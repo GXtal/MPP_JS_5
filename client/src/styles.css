@@ -1,0 +1,116 @@
+body {
+    background-color: gray;
+    background-image: url("../public/img/arknights_back.png");
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+nav{
+    display: flex;
+    align-self: center;
+    justify-content: center;
+}
+a {
+    text-decoration: none;
+}
+
+nav a:hover{
+    text-decoration: underline;  
+    color: crimson; 
+}
+
+.navigation{
+    margin-left: auto;
+    margin-right: auto;
+    box-shadow: 0 0 13px gray;
+    border-radius: 20px;
+    padding-left: 200px;
+    padding-right: 200px;
+    margin: 10px;
+}
+
+.navigationText{
+    font-size: 50px;
+    font-weight: bold;
+    color: blue;
+}
+
+.one-operator{
+    width: auto;
+    box-shadow: 0 0 5px blue;
+    background-color:darkgray;
+    border-radius: 20px;
+    padding: 10px;
+    margin: 20px;
+}
+.one-operator:hover{
+    box-shadow: 0 0 5px crimson;
+    background-color:darkgray;
+}
+
+.main-char-text{
+    font-size: 20px;
+    font-weight: bold;
+
+    color:crimson;
+}
+
+.sub-char-text{
+    font-size: 15px;
+    font-weight: bold;
+
+    color:blue;
+}
+
+.nice-button{
+    font-size: 15px;
+    margin: 10px;
+    padding-left: 15px;
+    padding-right: 15px;
+    border-radius: 5px;
+    border-color: blue;
+    background-color: darkgray;
+    color: blue;
+    font-weight: bold;
+}
+
+.nice-button:hover{
+    border-color: crimson;
+    color: crimson;
+}
+
+.character-edit{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.input-part{
+    margin: 10px;
+    padding: 5px;
+    font-size: 20px;
+    width: 300px;
+    color: darkmagenta;
+    box-shadow: 0 0 5px blue;
+    background-color:darkgray;
+    border-radius: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nice-input{
+    font-size: 15px;
+    margin: 10px;
+    padding-left: 15px;
+    padding-right: 15px;
+    border-radius: 5px;
+    border-color: crimson;
+    background-color: darkgray;
+    color: crimson;
+    font-weight: bold;
+}
+
+.nice-input:hover{
+    border-color: blue;
+    color: blue;
+}
