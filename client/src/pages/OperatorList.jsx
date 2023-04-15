@@ -1,121 +1,67 @@
-import React from 'react';
+import { useContext, useEffect, useState } from "react";
+
 import Operator from '../partials/Operator'
-import OperatorsService from '../services/OperatorsService';
-import withRouter from '../sub/withRouter'
 import { AuthContext } from "../contexts/AuthContext";
-import {
-    Navigate,
-  } from 'react-router-dom';
+import {socket, socketPrivate} from "../http";
+import {useNavigate} from "react-router-dom";
 
-class OperatorList extends React.Component {
+function OperatorList(props) {
+    const { dispatch, user } = useContext(AuthContext);
+    const [operators, setOperators] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState({});
 
+    const navigate = useNavigate()
+  
+    const createNewOperator = async (e) => {
 
-    static contextType = AuthContext;
-    state =
-        {
-            operators: [],
-            loading: true,
-            error: {},
-        };
+        e.preventDefault()
 
-
-    async componentDidMount() {
-        const { dispatch, user } = this.context;
-        if (user == null) {
-            this.props.router.navigate('/login');
+        socketPrivate.emit("operators:add", user?.id)
+        socketPrivate.emit("operators:getAll", user.id) 
+    };
+  
+    useEffect(()=>{
+        setLoading(true)
+        if(!user){
+            navigate('/login')
         }
-        try {
+        socketPrivate.emit("operators:getAll", user?.id)
+    },[])
 
-            console.log(user);
-            const response = await OperatorsService.fetchOperators(user.id);
-
-            this.setState(() => {
-                return { operators: response.data };
-            })
-
-
-        }
-        catch (e) {
-            console.log(e);
-
-            if (user == null) {
-                this.props.router.navigate('/login');
-            }
-            if (e.response?.status == 401) {
-                dispatch({ type: "LOGIN_FAILURE", payload: e.response.data })
-                this.props.router.navigate('/login');
-            }
-            else {
-
-            }
-        }
-        finally {
-            this.setState(() => { return { loading: false } });
-        }
-
-
-
+    const operatorsGetAllListener = (operators) =>{
+        setOperators(operators)
+        setError(null)
+        setLoading(false)
     }
 
-    createNewOperator = async () => {
-
-        const { dispatch, user } = this.context;
-        if (user == null) {
-            this.props.router.navigate('/login');
-        }
-        try {
-
-            const response = await OperatorsService.addOperator(user.id);
-
-            this.setState(() => {
-                return { operators: response.data };
-            })
-
-
-        }
-        catch (e) {
-            console.log(e);
-
-            if (user == null) {
-                this.props.router.navigate('/login');
-            }
-            if (e.response?.status == 401) {
-                dispatch({ type: "LOGIN_FAILURE", payload: e.response.data })
-                this.props.router.navigate('/login');
-            }
-            else {
-
-            }
-        }
-        finally {
-            this.setState(() => { return { loading: false } });
-        }
-
-
+    const errorListener = (err) => {
+        setError(err)
     }
-
-    render() {
-        const { dispatch, user } = this.context;
-        if(!user)
-        {
-            return (<Navigate replace to="/login"></Navigate>)
+  
+    useEffect(() => {
+        socketPrivate.on('operators:getAll', operatorsGetAllListener)
+        socketPrivate.on('error', errorListener)
+        return () => {
+            socketPrivate.off('operators:getAll', operatorsGetAllListener)
+            socketPrivate.off('error', errorListener)
         }
-        return (
-            <div>
+    }, [])
 
-                <div style={{ visibility: !this.state.loading ? "hidden" : "visible" }}>
-                    LOADING...
-                </div>
 
-                <div style={{ visibility: this.state.loading ? "hidden" : "visible" }}>
-                    <button className='btn btn-outline-primary  border-secondary bg-dark' onClick={this.createNewOperator}>Add</button>
-                    {this.state.operators.map((operator) => {
-                        return <Operator key={operator.id} op={operator} />
-                    })}
-                </div>
-            </div>
-        );
-    }
-}
-
-export default withRouter(OperatorList);
+    return (
+      <div>
+        <div style={{ visibility: !loading ? "hidden" : "visible" }}>
+          LOADING...
+        </div>
+        <div style={{ visibility: loading ? "hidden" : "visible" }}>
+          <button className='btn btn-outline-primary  border-secondary bg-dark' onClick={createNewOperator}>Add</button>
+          {operators.map((operator) => {
+            return <Operator key={operator.id} op={operator} />
+          })}
+        </div>
+      </div>
+    );
+  }
+  
+  export default OperatorList;

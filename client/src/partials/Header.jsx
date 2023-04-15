@@ -10,10 +10,10 @@ class Header extends React.Component {
 
     handleClick = async (e)=>{
         e.preventDefault()
-        const { dispatch, user } = this.context;
+        const {user, dispatch, refreshToken} = this.context;
         try {
             dispatch({type: 'LOGOUT'})
-            await AuthService.logout()
+            await AuthService.logout(refreshToken)
         }catch (e) {
             console.log(e)
         }finally {
@@ -23,13 +23,13 @@ class Header extends React.Component {
 
     render() {
 
-        const { dispatch, user } = this.context;
+        const {user, dispatch, refreshToken} = this.context;
 
         return (
             <div className="navbar navbar-expand-lg navbar-dark bg-dark">
                 <header>
                     <div className='collapse navbar-collapse' id="navbarNavAltMarkup">
-                        <div class="navbar-nav">
+                        <div className="navbar-nav">
 
                         <Link to="/" className="nav-item nav-link">Home</Link>
                         <Link to="/operators" className="nav-item nav-link">Operators</Link>

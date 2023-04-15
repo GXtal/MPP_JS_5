@@ -1,18 +1,15 @@
-import api from "../http/index"
+import {socket} from "../http/index"
 
 export default class AuthService{
     static async login(nickname, password){
-        const userData = await api.post('/users/login', {nickname, password})
-        localStorage.setItem('accessToken', userData.data.accessToken)
-        return userData.data.user
+        console.log("trying to log");
+        socket.emit("users:login", nickname, password)
     }
     static async registration(nickname, password, isAdmin){
-        const userData = await api.post('/users/registration', {nickname, password, isAdmin})
-        localStorage.setItem('accessToken', userData.data.accessToken)
-        return userData.data.user
+        socket.emit("users:registration", nickname, password, isAdmin)
     }
-    static async logout(){
+    static async logout(refreshToken){
         localStorage.removeItem('accessToken')
-        return api.post('/users/logout')
+        socket.emit("users:logout", refreshToken)
     }
 }

@@ -4,6 +4,142 @@ body {
     background-repeat: no-repeat;
     background-attachment: fixed;
 }
+
+.Caster{
+    background-image: url("../public/img/icon_profession_caster_large.png");
+    width: 60px;
+    height: 60px;
+    background-size: cover;
+}
+.Caster-big{
+    background-image: url("../public/img/icon_profession_caster_large.png");
+    width: 100px;
+    height: 100px;
+    background-size: cover;
+}
+
+.Sniper{
+    background-image: url("../public/img/icon_profession_sniper_large.png");
+    width: 60px;
+    height: 60px;
+    background-size: cover;
+}
+.Sniper-big{
+    background-image: url("../public/img/icon_profession_sniper_large.png");
+    width: 100px;
+    height: 100px;
+    background-size: cover;
+}
+
+.Defender{
+    background-image: url("../public/img/icon_profession_defender_large.png");
+    width: 60px;
+    height: 60px;
+    background-size: cover;
+}
+.Defender-big{
+    background-image: url("../public/img/icon_profession_defender_large.png");
+    width: 100px;
+    height: 100px;
+    background-size: cover;
+}
+
+.Guard{
+    background-image: url("../public/img/icon_profession_guard_large.png");
+    width: 60px;
+    height: 60px;
+    background-size: cover;
+}
+
+.Guard-big{
+    background-image: url("../public/img/icon_profession_guard_large.png");
+    width: 100px;
+    height: 100px;
+    background-size: cover;
+}
+
+.Medic{
+    background-image: url("../public/img/icon_profession_medic_large.png");
+    width: 60px;
+    height: 60px;
+    background-size: cover;
+}
+
+.Medic-big{
+    background-image: url("../public/img/icon_profession_medic_large.png");
+    width: 100px;
+    height: 100px;
+    background-size: cover;
+}
+
+.Specialist{
+    background-image: url("../public/img/icon_profession_specialist_large.png");
+    width: 60px;
+    height: 60px;
+    background-size: cover;
+}
+
+.Specialist-big{
+    background-image: url("../public/img/icon_profession_specialist_large.png");
+    width: 100px;
+    height: 100px;
+    background-size: cover;
+}
+
+.Supporter{
+    background-image: url("../public/img/icon_profession_support_large.png");
+    width: 60px;
+    height: 60px;
+    background-size: cover;
+}
+.Supporter-big{
+    background-image: url("../public/img/icon_profession_support_large.png");
+    width: 100px;
+    height: 100px;
+    background-size: cover;
+}
+
+.Vanguard{
+    background-image: url("../public/img/icon_profession_vanguard_large.png");
+    width: 60px;
+    height: 60px;
+    background-size: cover;
+}
+
+.Vanguard-big{
+    background-image: url("../public/img/icon_profession_vanguard_large.png");
+    width: 100px;
+    height: 100px;
+    background-size: cover;
+}
+
+.elite0{
+    background-image: url("../public/img/elite0.png");
+    width: 60px;
+    height: 60px;
+    background-size: cover;
+}
+.elite1{
+    background-image: url("../public/img/elite1.png");
+    width: 60px;
+    height: 60px;
+    background-size: cover;
+}
+.elite2{
+    background-image: url("../public/img/elite2.png");
+    width: 60px;
+    height: 60px;
+    background-size: cover;
+}
+
+.with-image{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items:center;
+}
+
+
 nav{
     display: flex;
     align-self: center;

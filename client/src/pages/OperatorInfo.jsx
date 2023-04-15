@@ -1,232 +1,201 @@
-import React from 'react';
-import withRouter from '../sub/withRouter';
+import React, { useContext, useEffect, useState } from 'react';
 import OperatorModel from '../models/operator-model';
-import OperatorsService from '../services/OperatorsService';
 import { AuthContext } from "../contexts/AuthContext";
-
-class OperatorInfo extends React.Component {
-
-    static contextType = AuthContext;
-
-    state =
-        {
-            operator: {},
-            loading: true,
-            error: {},
-        };
-
-    async componentDidMount() {
-
-        const { dispatch, user } = this.context;
-        let _id = this.props.router.params.id;
-        try {
-
-            if (user == null) {
-                this.props.router.navigate("/login")
-            }
-
-            const response = await OperatorsService.fetchOperator(_id);
-
-            this.setState(() => {
-                const a = response.data;
-                return { operator: new OperatorModel(a.id, a.owner, a.name, a.type, a.rarity, a.level, a.elite) };
-            })
+import { useNavigate, useParams } from "react-router-dom";
+import { socketPrivate } from "../http";
 
 
-        }
-        catch (e) {
-            console.log(e);
+function OperatorInfo(props) {
+    const { dispatch, user } = useContext(AuthContext);
 
-            if (user == null) {
-                this.props.router.navigate('/login');
-            }
-            if (e.response?.status == 401) {
-                dispatch({ type: "LOGIN_FAILURE", payload: e.response.data })
-                this.props.router.navigate('/login');
-            }
-            else {
+    const [operator, setOperator] = useState({});
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState({});
 
-            }
-        }
-        finally {
-            this.setState(() => { return { loading: false } });
-        }
+
+    const navigate = useNavigate()
+    const { id } = useParams()
+
+    const errorListener = (err) => {
+        setError(err)
     }
 
-    onNameChange = (event) => {
-        this.setState(() => {
-            var a = this.state.operator
-            var b = new OperatorModel(a.id,a.owner, event.target.value, a.type, a.rarity, a.level, a.elite);
-            return { operator: b };
-        });
+    const operatorGetListener = (operator) => {
+        setOperator(operator)
+        setError(null)
+        setLoading(false)
     }
 
-    onRarityChange = (event) => {
-        this.setState(() => {
-            var a = this.state.operator
-            var b = new OperatorModel(a.id, a.owner,a.name, a.type, event.target.value, a.level, a.elite);
-            return { operator: b };
-        });
+    const operatorDeleteListener = () => {
+        setLoading(false)
+        setError(null)
+        navigate('/operators')
     }
 
-    onTypeChange = (event) => {
-        this.setState(() => {
-            var a = this.state.operator
-            var b = new OperatorModel(a.id,a.owner, a.name, event.target.value, a.rarity, a.level, a.elite);
-            return { operator: b };
-        });
+    const operatorSetListener = (operator) => {
+        setLoading(false)
+        setOperator(operator)        
+        setError(null)
     }
 
-    onLevelUp = (event) => {
-        event.preventDefault()
-        this.setState(() => {
-            var a = this.state.operator
-            var b = new OperatorModel(a.id,a.owner, a.name, a.type, a.rarity, a.level, a.elite);
-            b.levelChange(b.level + 1);
-            return { operator: b };
-        });
-    }
-    onEliteUp = (event) => {
-        event.preventDefault()
-        this.setState(() => {
-            var a = this.state.operator
-            var b = new OperatorModel(a.id, a.owner,a.name, a.type, a.rarity, a.level, a.elite);
-            b.eliteChange(b.elite + 1);
-            return { operator: b };
-        });
-    }
-
-    onSave = async (event) => {
-        const { dispatch, user } = this.context;
-        try {
-
-            const response = await OperatorsService.updateOperator(this.state.operator.id, this.state.operator);
-
-            this.setState(() => {
-                const a = response.data;
-                return { operator: new OperatorModel(a.id, a.owner, a.name, a.type, a.rarity, a.level, a.elite) };
-            })
-
-
+    useEffect(() => {
+        socketPrivate.on('operators:get', operatorGetListener)
+        socketPrivate.on('operators:delete', operatorDeleteListener)
+        socketPrivate.on('operators:set', operatorSetListener)
+        socketPrivate.on('error', errorListener)
+        return () => {
+            socketPrivate.off('operators:get', operatorGetListener)
+            socketPrivate.off('operators:delete', operatorDeleteListener)
+            socketPrivate.off('operators:set', operatorSetListener)
+            socketPrivate.off('error', errorListener)
         }
-        catch (e) {
-            console.log(e);
+    }, [])
 
-            if (user == null) {
-                this.props.router.navigate('/login');
-            }
-            if (e.response?.status == 401) {
-                dispatch({ type: "LOGIN_FAILURE", payload: e.response.data })
-                this.props.router.navigate('/login');
-            }
-            else {
+    useEffect(() => {
+        setLoading(true)
+        socketPrivate.emit('operators:get', id, user.id)
+    }, [])
 
-            }
-        }
-        finally {
-            this.setState(() => { return { loading: false } });
-        }
-    }
-
-    onDelete = async (event) => {
-
-        const { dispatch, user } = this.context;
-        try {
-
-            const response = await OperatorsService.deleteOperator(this.state.operator.id);
-            this.props.router.navigate('/operators');
-
-        }
-        catch (e) {
-            console.log(e);
-
-            if (user == null) {
-                this.props.router.navigate('/login');
-            }
-            if (e.response?.status == 401) {
-                dispatch({ type: "LOGIN_FAILURE", payload: e.response.data })
-                this.props.router.navigate('/login');
-            }
-            else {
-
-            }
-        }
-        finally {
-            this.setState(() => { return { loading: false } });
-        }
-
-
-    }
-
-    render() {
-        return (
-            <div>
-
-                <div class="spinner-grow text-primary text-center" role="status" style={{ visibility: !this.state.loading ? "hidden" : "visible" }}>
-                    <span class="sr-only"></span>
-                </div>
-
-
-                <form> 
-                    
-                <div className="container bg-dark d-flex flex-column mt-3 pt-3 align-items-center
-            rounded-5 border border-secondary w-50" style={{ visibility: this.state.loading ? "hidden" : "visible" }}>
-
-                    <div className="form-group">
-                        <label>Name:</label>
-                        <input className="form-control" value={this.state.operator.name} onChange={this.onNameChange} />
-                    </div>
-
-                    <div className="form-group">
-                        <label>Character rarity:</label>
-                        <select className="form-control" value={this.state.operator.rarity} onChange={this.onRarityChange}>
-                            <option value="6">Six star</option>
-                            <option value="5">Five star</option>
-                            <option value="4">Four star</option>
-                            <option value="3">Three star</option>
-                            <option value="2">Two star</option>
-                            <option value="1">One star</option>
-                        </select>
-                    </div>
-
-                    <div className="form-group">
-                        <label>Character type:</label>
-                        <select className="form-control" value={this.state.operator.type} onChange={this.onTypeChange}>
-                            <option value="Sniper">Sniper</option>
-                            <option value="Defender">Defender</option>
-                            <option value="Caster">Caster</option>
-                            <option value="Guard">Guard</option>
-                            <option value="Medic">Medic</option>
-                            <option value="Specialist">Specialist</option>
-                            <option value="Supporter">Supporter</option>
-                            <option value="Vanguard">Vanguard</option>
-                        </select>
-                    </div>
-
-                    <div className="form-group">
-                        <label>Level:</label>
-                        <input className="form-control" value={this.state.operator.level} />
-                        <button className="form-control" onClick={this.onLevelUp}>Level Up</button>
-                    </div>
-
-                    <div className="form-group">
-                        <label>Elited:</label>
-                        <input className="form-control" value={this.state.operator.elite} />
-                        <button className="form-control" onClick={this.onEliteUp}> Elited  Up</button>
-                    </div>
-
-
-                    <div className="input-part">
-                        <button className="nice-button" onClick={this.onSave}>Save</button>
-                        <button className="nice-button" onClick={this.onDelete}>Delete</button>
-                    </div>
-
-
-                </div>
-                </form>
-            </div>
+    function onNameChange(event) {
+        const a = operator;
+        const b = new OperatorModel(
+            a.id,
+            a.owner,
+            event.target.value,
+            a.type,
+            a.rarity,
+            a.level,
+            a.elite
         );
+        setOperator(b);
     }
+
+    function onRarityChange(event) {
+
+        var a = operator
+        var b = new OperatorModel(a.id, a.owner, a.name, a.type, event.target.value, a.level, a.elite);
+        setOperator(b);
+        
+    }
+
+    function onTypeChange(event) {
+
+        var a = operator
+        var b = new OperatorModel(a.id, a.owner, a.name, event.target.value, a.rarity, a.level, a.elite);
+        setOperator(b);
+    }
+
+    function onLevelUp(event) {
+        event.preventDefault()
+
+
+        var a = operator
+        var b = new OperatorModel(a.id, a.owner, a.name, a.type, a.rarity, a.level, a.elite);
+        b.levelChange(b.level + 1);
+        setOperator(b);
+
+    }
+    function onEliteUp(event) {
+        event.preventDefault()
+
+        var a = operator
+        var b = new OperatorModel(a.id, a.owner, a.name, a.type, a.rarity, a.level, a.elite);
+        b.eliteChange(b.elite + 1);
+        setOperator(b);
+
+    }
+
+    async function handleSave(event) {
+        event.preventDefault()
+
+        socketPrivate.emit('operators:set', id, user.id, operator)
+    }
+
+    async function handleDelete(event) {
+        event.preventDefault()
+
+        setLoading(true)
+        socketPrivate.emit('operators:delete', id, user.id)
+    }
+
+    return (
+        <div>
+
+            <div className="spinner-grow text-primary text-center" role="status" style={{ visibility: !loading ? "hidden" : "visible" }}>
+                <span className="sr-only"></span>
+            </div>
+
+
+            <form>
+
+                <div className="container bg-dark d-flex flex-column mt-3 pt-3 align-items-center
+    rounded-5 border border-secondary w-50" style={{ visibility: loading ? "hidden" : "visible" }}>
+
+                    <div className="form-group w-50">
+                        <label className="text-primary">Name:</label>
+                        <input className="form-control" value={operator.name} onChange={onNameChange} />
+                    </div>
+
+                    <div className="form-group w-50">
+                        <div className="form-group w-50">
+                            <label className="text-primary">Character rarity:</label>
+                            <select className="form-control" value={operator.rarity} onChange={onRarityChange}>
+                                <option value="6">Six star</option>
+                                <option value="5">Five star</option>
+                                <option value="4">Four star</option>
+                                <option value="3">Three star</option>
+                                <option value="2">Two star</option>
+                                <option value="1">One star</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div className="form-group w-50 with-image">
+                        <div className="form-group w-50">
+                            <label className="text-primary">Character type:</label>
+                            <select className="form-control" value={operator.type} onChange={onTypeChange}>
+                                <option value="Sniper">Sniper</option>
+                                <option value="Defender">Defender</option>
+                                <option value="Caster">Caster</option>
+                                <option value="Guard">Guard</option>
+                                <option value="Medic">Medic</option>
+                                <option value="Specialist">Specialist</option>
+                                <option value="Supporter">Supporter</option>
+                                <option value="Vanguard">Vanguard</option>
+                            </select>
+                        </div>
+                        <div className={operator.type}></div>
+                    </div>
+
+                    <div className="form-group w-50">
+                        <label className="text-primary">Level:</label>
+                        <input className="form-control" value={operator.level} />
+                        <button className="form-control" onClick={onLevelUp}>Level Up</button>
+                    </div>
+
+                    <div className="form-group w-50 with-image">
+                        <div>
+                        <label className="text-primary">Elited:</label>
+                        <input className="form-control" value={operator.elite} />
+                        <button className="form-control" onClick={onEliteUp}> Elited  Up</button>
+                        </div>
+                        <div className={'elite'+operator.elite}></div>
+                    </div>
+
+
+                    <div className="form-group w-50">
+                        <label>Options</label>
+                        <button className="btn btn-outline-primary w-100" onClick={handleSave}>Save</button>
+                        <button className="btn btn-outline-primary w-100" onClick={handleDelete}>Delete</button>
+                        <label>End</label>
+                    </div>
+
+
+                </div>
+            </form>
+        </div>
+    );
 }
 
-export default withRouter(OperatorInfo);
+export default OperatorInfo;
+

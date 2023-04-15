@@ -103,11 +103,13 @@ class UserService {
         if (!userData || !tokenData) {
             return ApiError.UnauthorizedError()
         }
+
         const index = this.users.findIndex((x) => x.id === userData.id);
         if (index == -1) {
             throw ApiError.BadRequest('No user with such nickname')
         }
         const user = this.users[index];
+
         const tokens = tokenService.generateTokens({ ...user })
 
         await tokenService.saveToken(user.id, tokens.refreshToken)
@@ -117,6 +119,13 @@ class UserService {
             user: user
         }
     }
+
+    async getUser(id){
+        const user = this.users[index];
+
+        return {...user}
+    }
+
 }
 
 module.exports = new UserService()

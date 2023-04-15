@@ -1,14 +1,18 @@
-const express = require("express");
-const cors = require('cors');
-const cookieParser = require('cookie-parser');
 require('dotenv').config()
 
-const operatorsRouter = require("./routes/operators");
-const errorMiddleware = require('./middleware/error-middleware');
-const userRouter = require('./routes/users');
+const express = require('express');
+const cookieParser = require('cookie-parser');
+const cors = require('cors')
+
 const authMiddleware = require('./middleware/auth-middleware')
+const errorMiddleware = require('./middleware/error-middleware')
+
+const {graphqlHTTP} = require("express-graphql");
+const {userSchema, operatorSchema} = require('./schemas/index')
 
 const app = express();
+const port = normalizePort(process.env.PORT || '5000');
+
 
 app.use(express.json());
 app.use(cookieParser());
@@ -17,10 +21,15 @@ app.use(cors({
     origin: process.env.CLIENT_URL
 }))
 
+app.use('/graphql/users', graphqlHTTP({
+    graphiql: true,
+    schema: userSchema
+}))
 
-app.use('/api/operators',authMiddleware, operatorsRouter);
-//app.use('/api/operators', operatorsRouter);
-app.use('/api/users', userRouter);
+app.use('/graphql/operator', authMiddleware, graphqlHTTP({
+    graphiql: true,
+    schema: operatorSchema
+}))
 
 app.use(errorMiddleware)
 
@@ -32,4 +41,19 @@ app.get("/api", (req, res) => {
 
 
 
-app.listen(5000, () => { console.log("started on 5000") });
+app.listen(5000, () => { console.log('Listening on ' + port); });
+
+
+function normalizePort(val) {
+    const port = parseInt(val, 10);
+
+    if (isNaN(port)) {
+        return val;
+    }
+
+    if (port >= 0) {
+        return port;
+    }
+
+    return false;
+}

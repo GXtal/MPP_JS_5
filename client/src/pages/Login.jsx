@@ -1,7 +1,8 @@
-import React, {useContext, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {AuthContext} from "../contexts/AuthContext";
 import {useNavigate} from "react-router-dom";
 import AuthService from "../services/AuthService";
+import {socket} from "../http";
 
 function Login(props) {
     const [credentials, setCredentials] = useState({
@@ -9,7 +10,7 @@ function Login(props) {
         password: undefined
     })
 
-    const {loading, error, dispatch} = useContext(AuthContext)
+    const {loading, error, dispatch, user} = useContext(AuthContext)
 
     const navigate = useNavigate()
 
@@ -19,19 +20,26 @@ function Login(props) {
 
     const handleClick = async (e) => {
         e.preventDefault()
-        dispatch({type: "LOGIN_START"})
+        dispatch({type: "LOGIN_START", payload: () => {
+                navigate('/')
+            }})
         try {
-            const res = await AuthService.login(credentials.nickname, credentials.password)
-            dispatch({type: "LOGIN_SUCCESS", payload: res})
-            navigate("/")
+            await AuthService.login(credentials.nickname, credentials.password)
         }catch(err){
-            dispatch({type: "LOGIN_FAILURE", payload: err.response?err.response.data:err})
+            dispatch({type: "LOGIN_FAILURE", payload: err})
         }
     }
 
+    useEffect(() => {
+        if(user)
+            navigate('/')
+        else
+            dispatch({type: 'LOGOUT'})
+    }, [])
+    
     return (
         <div>
-            <div className="container bg-dark d-flex flex-column p-5 w-50 align-items-center
+            <div className="container bg-dark d-flex flex-column p-5 w-20 align-items-center
             rounded-5 border border-secondary align-middle">
                 <div className="w-100">
                     <div className="input-group mb-2">
