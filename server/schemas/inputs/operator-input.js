@@ -1,6 +1,6 @@
 const graphql = require('graphql')
 
-const operatorInputType = new graphql.GraphQLObjectType({
+const operatorInputType = new graphql.GraphQLInputObjectType({
     name: "OperatorInput",
     fields:{
         id: {type: graphql.GraphQLInt},

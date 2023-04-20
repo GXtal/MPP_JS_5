@@ -6,8 +6,8 @@ const {operatorInputType} = require("../inputs/operator-input");
 const setOperator = {
     type: operatorType,
     args:{
-        id: {type: new graphql.GraphQLNonNull(graphql.GraphQLInt)},
-        owner: {type: new graphql.GraphQLNonNull(graphql.GraphQLInt)},
+        id: {type: graphql.GraphQLInt},
+        owner: {type: graphql.GraphQLInt},
         operatorInput: {type: new graphql.GraphQLNonNull(operatorInputType)}
     },
     resolve: async (_, {id,owner,operatorInput}) => {
@@ -22,20 +22,21 @@ const addOperator = {
         owner: {type: new graphql.GraphQLNonNull(graphql.GraphQLInt)},
     },
     resolve: async (_, {owner}) => {
-        const operator = await operatorService.add(owner)
-        return operator
+        const operators = await operatorService.add(owner)
+        return operators
     }
 }
 
 const deleteOperator = {
     type: new graphql.GraphQLList(operatorType),
     args:{
-        id: {type: new graphql.GraphQLNonNull(graphql.GraphQLInt)},
-        owner: {type: new graphql.GraphQLNonNull(graphql.GraphQLInt)},
+        id: {type: graphql.GraphQLInt},
+        owner: {type: graphql.GraphQLInt},
     },
-    resolve: async (_, {id}) => {
-        const operator = await operatorService.delete(id, owner)
-        return operator
+    resolve: async (_, {id,owner}) => {
+        console.log("on delte");
+        const operators = await operatorService.delete(id, owner)
+        return operators
     }
 }
 

@@ -1,35 +1,24 @@
-import React from 'react';
-import { Link } from "react-router-dom";
-import { AuthContext } from '../contexts/AuthContext';
-import AuthService from "../services/AuthService";
-import withRouter from '../sub/withRouter';
+import React, {useContext} from 'react';
+import {AuthContext} from "../contexts/AuthContext";
+import {Link, useNavigate} from "react-router-dom";
 
-class Header extends React.Component {
+function Header(props) {
+    const { user, logout } = useContext(AuthContext)
 
-    static contextType = AuthContext;
 
-    handleClick = async (e)=>{
+    const navigate = useNavigate()
+
+    const handleClick = async (e) => {
         e.preventDefault()
-        const {user, dispatch, refreshToken} = this.context;
-        try {
-            dispatch({type: 'LOGOUT'})
-            await AuthService.logout(refreshToken)
-        }catch (e) {
-            console.log(e)
-        }finally {
-            this.props.router.navigate("/login")
-        }
+
+        await logout()
     }
 
-    render() {
-
-        const {user, dispatch, refreshToken} = this.context;
-
-        return (
-            <div className="navbar navbar-expand-lg navbar-dark bg-dark">
-                <header>
-                    <div className='collapse navbar-collapse' id="navbarNavAltMarkup">
-                        <div className="navbar-nav">
+    return (
+        <div className="navbar navbar-expand-lg navbar-dark bg-dark">
+            <header>
+                <div className='collapse navbar-collapse' id="navbarNavAltMarkup">
+                    <div className="navbar-nav">
 
                         <Link to="/" className="nav-item nav-link">Home</Link>
                         <Link to="/operators" className="nav-item nav-link">Operators</Link>
@@ -37,8 +26,8 @@ class Header extends React.Component {
                         {user ?
                             (
                                 <>
-                                <span className="nav-item nav-link text-white">{user.nickname}</span>
-                                <button onClick={this.handleClick} className="nav-item nav-link btn ">Logout</button>
+                                    <span className="nav-item nav-link text-white">{user.nickname}</span>
+                                    <button onClick={handleClick} className="nav-item nav-link btn ">Logout</button>
                                 </>)
                             :
                             (
@@ -48,15 +37,15 @@ class Header extends React.Component {
                                 </div>
                             )
                         }
-                        </div>
-
                     </div>
-                    
 
-                </header>
-            </div>
-        );
-    }
+                </div>
+
+
+            </header>
+        </div>
+    );
+
 }
 
-export default withRouter(Header);
+export default Header;

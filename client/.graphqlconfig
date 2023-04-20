@@ -1,0 +1,34 @@
+{
+  "projects": {
+    "users": {
+      "name": "Users graphql scheme",
+      "schemaPath": "usersSchema.graphql",
+      "extensions": {
+        "endpoints": {
+          "Default GraphQL Endpoint": {
+            "url": "http://localhost:5000/graphql/users",
+            "headers": {
+              "user-agent": "JS GraphQL"
+            },
+            "introspect": false
+          }
+        }
+      }
+    },
+    "private": {
+      "name": "Private graphql scheme",
+      "schemaPath": "privateSchema.graphql",
+      "extensions": {
+        "endpoints": {
+          "Default GraphQL Endpoint": {
+            "url": "http://localhost:5000/graphql/operator",
+            "headers": {
+              "user-agent": "JS GraphQL"
+            },
+            "introspect": false
+          }
+        }
+      }
+    }
+  }
+}

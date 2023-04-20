@@ -1,8 +1,6 @@
 import React, {useContext, useEffect, useState} from 'react';
 import {AuthContext} from "../contexts/AuthContext";
 import {useNavigate} from "react-router-dom";
-import AuthService from "../services/AuthService";
-import {socket} from "../http";
 
 function Register(props) {
     const [credentials, setCredentials] = useState({
@@ -11,7 +9,7 @@ function Register(props) {
         confirmPassword: undefined
     })
 
-    const {loading, error, dispatch, user} = useContext(AuthContext)
+    const {registration, error, loading} = useContext(AuthContext)
 
     const navigate = useNavigate()
 
@@ -21,25 +19,12 @@ function Register(props) {
 
     const handleClick = async (e) => {
         e.preventDefault()
-        dispatch({type: "LOGIN_START"})
-        try {
-            if(credentials.password === credentials.confirmPassword)
-            {
-                await AuthService.registration(credentials.nickname, credentials.password, false)
-            }else{
-                dispatch({type: "LOGIN_FAILURE", payload: Error("Passwords are not equal")})
-            }
-        }catch(err){
-            dispatch({type: "LOGIN_FAILURE", payload: err.response?err.response.data:err})
-        }
-    }
 
-    useEffect(() => {
-        if(user)
-            navigate('/')
-        else
-            dispatch({type: 'LOGOUT'})
-    }, [])
+        registration(credentials)?.then((data) => {
+            if(!data.errors)
+                navigate("/")
+        })
+    }
     
 
     return (

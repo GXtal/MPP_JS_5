@@ -2,58 +2,57 @@ import React, { useContext, useEffect, useState } from 'react';
 import OperatorModel from '../models/operator-model';
 import { AuthContext } from "../contexts/AuthContext";
 import { useNavigate, useParams } from "react-router-dom";
-import { socketPrivate } from "../http";
+import { useMutation, useQuery } from "@apollo/client";
+import { GET_OPERATOR } from '../graphql/queries/operator-queries';
+import { DELETE_OPERATOR, SET_OPERATOR } from '../graphql/mutations/operator-mutations'
 
 
 function OperatorInfo(props) {
     const { dispatch, user } = useContext(AuthContext);
 
     const [operator, setOperator] = useState({});
-    const [loading, setLoading] = useState(true);
     const [error, setError] = useState({});
 
 
     const navigate = useNavigate()
     const { id } = useParams()
 
-    const errorListener = (err) => {
-        setError(err)
+    const errorHandler = (error) => {
+        setError(error.networkError.result.message)
     }
 
-    const operatorGetListener = (operator) => {
-        setOperator(operator)
-        setError(null)
-        setLoading(false)
-    }
-
-    const operatorDeleteListener = () => {
-        setLoading(false)
-        setError(null)
-        navigate('/operators')
-    }
-
-    const operatorSetListener = (operator) => {
-        setLoading(false)
-        setOperator(operator)        
-        setError(null)
-    }
-
-    useEffect(() => {
-        socketPrivate.on('operators:get', operatorGetListener)
-        socketPrivate.on('operators:delete', operatorDeleteListener)
-        socketPrivate.on('operators:set', operatorSetListener)
-        socketPrivate.on('error', errorListener)
-        return () => {
-            socketPrivate.off('operators:get', operatorGetListener)
-            socketPrivate.off('operators:delete', operatorDeleteListener)
-            socketPrivate.off('operators:set', operatorSetListener)
-            socketPrivate.off('error', errorListener)
+    const { loading, refetch } = useQuery(GET_OPERATOR, {
+        variables: {
+            id: id - 0,
+            owner: user.id - 0,
+        },
+        onError: errorHandler,
+        onCompleted: data => {
+            console.log(data);
+            const a = data.getOperator;
+            var b = new OperatorModel(a.id, a.owner, a.name, a.type, a.rarity, a.level, a.elite);
+            setOperator(b);
         }
-    }, [])
+    })
+
+
+    const [deleteOperator] = useMutation(DELETE_OPERATOR, {
+        onError: errorHandler,
+        onCompleted: () => {
+            navigate(-1)
+        }
+    })
+
+    const [setOperatorMutation] = useMutation(SET_OPERATOR, {
+        onError: errorHandler,
+        onCompleted: () => {
+            navigate(-1)
+        }
+    })
 
     useEffect(() => {
-        setLoading(true)
-        socketPrivate.emit('operators:get', id, user.id)
+        console.log(id, user.id);
+        refetch();
     }, [])
 
     function onNameChange(event) {
@@ -75,7 +74,7 @@ function OperatorInfo(props) {
         var a = operator
         var b = new OperatorModel(a.id, a.owner, a.name, a.type, event.target.value, a.level, a.elite);
         setOperator(b);
-        
+
     }
 
     function onTypeChange(event) {
@@ -108,14 +107,35 @@ function OperatorInfo(props) {
     async function handleSave(event) {
         event.preventDefault()
 
-        socketPrivate.emit('operators:set', id, user.id, operator)
+        setOperatorMutation({
+            variables: {
+                id: operator.id-0,
+                owner: user.id-0,
+                // id: {type: graphql.GraphQLInt},
+                // owner: {type: graphql.GraphQLInt},
+                // name: {type: graphql.GraphQLString},
+                // type: {type: graphql.GraphQLString},
+                // rarity: {type: graphql.GraphQLInt},
+                // level: {type: graphql.GraphQLInt},        
+                // elite: {type: graphql.GraphQLInt},
+                input: {
+                    id: operator.id, owner: operator.owner, name: operator.name,
+                    type: operator.type, rarity: operator.rarity-0, level: operator.level, elite: operator.elite
+                }
+            }
+        })
     }
 
     async function handleDelete(event) {
         event.preventDefault()
+        console.log(operator.id, user.id)
+        deleteOperator({
+            variables: {
+                id: operator.id-0,
+                owner: user.id-0,
+            }
+        });
 
-        setLoading(true)
-        socketPrivate.emit('operators:delete', id, user.id)
     }
 
     return (
@@ -175,11 +195,11 @@ function OperatorInfo(props) {
 
                     <div className="form-group w-50 with-image">
                         <div>
-                        <label className="text-primary">Elited:</label>
-                        <input className="form-control" value={operator.elite} />
-                        <button className="form-control" onClick={onEliteUp}> Elited  Up</button>
+                            <label className="text-primary">Elited:</label>
+                            <input className="form-control" value={operator.elite} />
+                            <button className="form-control" onClick={onEliteUp}> Elited  Up</button>
                         </div>
-                        <div className={'elite'+operator.elite}></div>
+                        <div className={'elite' + operator.elite}></div>
                     </div>
 
 
